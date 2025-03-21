@@ -1,32 +1,19 @@
-//
-//  VisionProBeginningApp.swift
-//  VisionProBeginning
-//
-//  Created by d on 2025/03/21.
-//
-
 import SwiftUI
 
+// MARK: - App Entry Point
 @main
-struct VisionProBeginningApp: App {
-
-    @State private var appModel = AppModel()
+struct SpatialPlayerApp: App {
+    @StateObject private var viewModel = PlayerViewModel()
 
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .environment(appModel)
+                .environmentObject(viewModel)
         }
-
-        ImmersiveSpace(id: appModel.immersiveSpaceID) {
+        
+        ImmersiveSpace(id: "PlayerSpace") {
             ImmersiveView()
-                .environment(appModel)
-                .onAppear {
-                    appModel.immersiveSpaceState = .open
-                }
-                .onDisappear {
-                    appModel.immersiveSpaceState = .closed
-                }
+                .environmentObject(viewModel)
         }
         .immersionStyle(selection: .constant(.full), in: .full)
     }
