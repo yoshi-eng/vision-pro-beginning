@@ -14,20 +14,18 @@ struct ImmersiveView: View {
     @Environment(\.dismissImmersiveSpace) private var dismissImmersiveSpace
     @Environment(\.openImmersiveSpace) private var openImmersiveSpace
     @Environment(\.openWindow) private var openWindow
-    @State var route = 1
+    @State var route = 0
     
     var body: some View {
         Group {
+            // routeによって画面を切り替える
             switch route {
-            case 0: LookBackView()
+            case 0: LookBackView {
+                route = 1
+            }
             case 1: DarkView {
                 route = 2
             }
-            case 9:
-                // デバッグ用
-                RealityView { content in
-                    content.add(BackSphereEntity.shared)
-                }
             default: ComeBackView()
             }
         }
