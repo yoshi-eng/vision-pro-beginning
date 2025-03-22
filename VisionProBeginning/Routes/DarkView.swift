@@ -19,18 +19,23 @@ struct DarkView: View {
         BubbleEntity.generateBubbleEntity(position: SIMD3<Float>( 1, 2, 4-2), radius: 0.3)
     ]
     
+    // 監視系の同期タイマー
+    @State var timer = Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()
+    
     // 振り向いたかどうかを監視する
-    @StateObject var vm: DarkViewModel = DarkViewModel()
-    @State var timer = Timer.publish(every: 0.2, on: .main, in: .common).autoconnect()
+    @StateObject var worldTracker: WorldTrackingViewModel = WorldTrackingViewModel()
     @State var initialDirection: simd_float2?
     @State var isTurnedBack = false
+    
+    // 手を伸ばしたかどうかを監視する
+    @StateObject var handTracker = HandTrackingViewModel.shared
     
     // 光をつかんだら次へ
     var onCatchLight: () -> Void
     
     // 後ろに振り向かせるための誘導テキスト
     func getTextEntity() async throws -> ModelEntity {
-        let textString = AttributedString("後ろを見て")
+        let textString = AttributedString("思い出は後ろから見守ってくれてるよ")
         let textMesh = try await MeshResource(extruding: textString)
         let material = SimpleMaterial(color: .white, isMetallic: false)
         let textModel = ModelEntity(mesh: textMesh, materials: [material])
@@ -88,12 +93,15 @@ struct DarkView: View {
             // 光をつかんだということにする
             onCatchLight()
         })
-        .task() {
-            await vm.run()
+        .task {
+            await worldTracker.run()
+            // TODO: HandTrackingはシミュレーターだとクラッシュした。
+//            await handTracker.run()
         }
         .onReceive(timer) { _ in
             Task {
-                if let transform = await vm.getTransform() {
+                // 振り向き具合を取得して判定
+                if let transform = await worldTracker.getTransform() {
                     // カメラの変換行列からユーザーの向きを抽出
                     let columns = transform.columns
                     
@@ -119,41 +127,13 @@ struct DarkView: View {
                         }
                     }
                 }
+                
+                // TODO: 手を伸ばしたかどうかを取得して判定
+                let isReachedHand = false
+                if isReachedHand {
+                    onCatchLight()
+                }
             }
         }
     }
 }
-
-@MainActor
-final class DarkViewModel: ObservableObject {
-    let session = ARKitSession()
-    let worldInfo = WorldTrackingProvider()
-
-    func run() async {
-        do {
-            try await session.run([worldInfo])
-            await handleAnchorUpdates()
-        } catch {
-            assertionFailure("Failed to run session: \(error)")
-        }
-    }
-
-    func handleAnchorUpdates() async {
-        for await update in worldInfo.anchorUpdates {
-            switch update.event {
-            case .added, .updated:
-                print("Anchor position updated.")
-            case .removed:
-                print("Anchor position now unknown.")
-            }
-        }
-    }
-    
-    func getTransform() async -> simd_float4x4? {
-        if let anchor = worldInfo.queryDeviceAnchor(atTimestamp: CACurrentMediaTime()) {
-            return anchor.originFromAnchorTransform
-        }
-        return nil
-    }
-}
-
