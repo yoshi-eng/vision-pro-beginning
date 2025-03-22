@@ -191,17 +191,17 @@ class PlayerViewModel {
 
     init() {
         // 4個のビデオを配置
-        let videoCount = 1
+        let videoCount = 4
         
-        // 間隔と基準位置（2x2のグリッド）
-        let spacing: Float = 15.0 // より広い間隔に
-        let depth: Float = -40.0  // より遠くに配置
+        // 間隔と基準位置（2×2のグリッド）
+        let spacing: Float = 12.0
+        let depth: Float = -40.0
         
         let positions = [
-            SIMD3<Float>(-spacing/2, spacing/2, depth), // 左上
-            SIMD3<Float>(spacing/2, spacing/2, depth),  // 右上
-            SIMD3<Float>(-spacing/2, -spacing/2, depth), // 左下
-            SIMD3<Float>(spacing/2, -spacing/2, depth)   // 右下
+            SIMD3<Float>(-spacing/2, spacing/2, depth),   // 左上
+            SIMD3<Float>(spacing/2, spacing/2, depth),    // 右上
+            SIMD3<Float>(-spacing/2, -spacing/2, depth),  // 左下
+            SIMD3<Float>(spacing/2, -spacing/2, depth)    // 右下
         ]
         
         for i in 0..<videoCount {
@@ -230,51 +230,25 @@ struct ContentView: View {
                 .padding()
             
             if viewModel.isImmersiveSpaceShown {
-                // ビデオ情報を表示
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 10) {
-                        ForEach(viewModel.videos) { videoInfo in
-                            VStack(alignment: .leading, spacing: 5) {
-                                Text("ビデオ \(videoInfo.id)")
-                                    .font(.headline)
-                                HStack {
-                                    Text("空間ビデオ：").bold()
-                                    Text(videoInfo.isSpatial ? "あり" : "なし")
-                                }
-                                HStack {
-                                    Text("サイズ：").bold()
-                                    Text(videoInfo.sizeString)
-                                }
-                                HStack {
-                                    Text("プロジェクション：").bold()
-                                    Text(videoInfo.projectionTypeString)
-                                }
-                                HStack {
-                                    Text("水平視野角：").bold()
-                                    Text(videoInfo.horizontalFieldOfViewString)
-                                }
-                            }
-                            .padding()
-                            .background(Color.gray.opacity(0.1))
-                            .cornerRadius(10)
-                        }
+                // シンプルな操作パネル
+                VStack {
+                    Text("現実空間に4つのビデオを表示中")
+                        .font(.headline)
+                        .padding()
+                    
+                    Button("再生停止", systemImage: "stop.fill") {
+                        stopPlayback()
                     }
+                    .buttonStyle(.bordered)
+                    .controlSize(.large)
                     .padding()
                 }
-                
-                Toggle("ステレオモードで再生", isOn: $viewModel.shouldPlayInStereo)
-                    .fixedSize()
-                    .disabled(!viewModel.isSpatialVideoAvailable)
-                    .padding(.bottom)
-                
-                Button("再生停止", systemImage: "stop.fill") {
-                    stopPlayback()
-                }
-                .buttonStyle(.bordered)
-                .controlSize(.large)
+                .padding()
+                .background(Color.gray.opacity(0.1))
+                .cornerRadius(10)
                 .padding()
             } else {
-                Text("複数のvideo1.movを再生するアプリです")
+                Text("4つの円形ビデオをパススルー環境の現実空間に表示します")
                     .padding()
                 
                 Button("再生開始", systemImage: "play.fill") {

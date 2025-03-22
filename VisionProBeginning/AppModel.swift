@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AVFoundation
 
 /// Maintains app-wide state
 @MainActor
