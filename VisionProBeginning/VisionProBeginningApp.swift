@@ -6,20 +6,22 @@
 //
 
 import SwiftUI
+import os
 
 @main
 struct VisionProBeginningApp: App {
 
     @State private var appModel = AppModel()
+    @State private var playerViewModel = PlayerViewModel()
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(viewModel: playerViewModel)
                 .environment(appModel)
         }
 
         ImmersiveSpace(id: appModel.immersiveSpaceID) {
-            ImmersiveView()
+            ImmersiveView(viewModel: playerViewModel)
                 .environment(appModel)
                 .onAppear {
                     appModel.immersiveSpaceState = .open
@@ -31,3 +33,5 @@ struct VisionProBeginningApp: App {
         .immersionStyle(selection: .constant(.full), in: .full)
     }
 }
+
+let logger = Logger()

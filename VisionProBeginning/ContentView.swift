@@ -6,13 +6,14 @@ import Combine
 import RealityKitContent
 
 // MARK: - Video Info Model
+@Observable
 class VideoInfo: Identifiable {
     let id = UUID()
-    @Published var isSpatial: Bool = false
-    @Published var size: CGSize = .zero
-    @Published var projectionType: CMProjectionType?
-    @Published var horizontalFieldOfView: Float?
-    @Published var position: SIMD3<Float>
+    var isSpatial: Bool = false
+    var size: CGSize = .zero
+    var projectionType: CMProjectionType?
+    var horizontalFieldOfView: Float?
+    var position: SIMD3<Float>
     
     init(position: SIMD3<Float> = SIMD3<Float>(0, 0, -50)) {
         self.position = position
@@ -139,7 +140,7 @@ struct VideoTools {
         let scale = calculateScaleFactor(
             videoWidth: width, videoHeight: height,
             zDistance: zDistance, fovDegrees: horizontalFieldOfView
-        ) * 0.5 // 少し小さめに
+        ) * 2 //* 0.5 // 少し小さめに
         
         // 基本的な変換行列（位置は後で設定）
         let transform = Transform(
@@ -182,15 +183,16 @@ struct VideoTools {
 }
 
 // MARK: - View Model
-class PlayerViewModel: ObservableObject {
-    @Published var videos: [VideoInfo] = []
-    @Published var isImmersiveSpaceShown: Bool = false
-    @Published var isSpatialVideoAvailable: Bool = false
-    @Published var shouldPlayInStereo: Bool = true
+@Observable
+class PlayerViewModel {
+    var videos: [VideoInfo] = []
+    var isImmersiveSpaceShown: Bool = false
+    var isSpatialVideoAvailable: Bool = false
+    var shouldPlayInStereo: Bool = true
 
     init() {
         // 4個のビデオを配置
-        let videoCount = 4
+        let videoCount = 1
         
         // 間隔と基準位置（2x2のグリッド）
         let spacing: Float = 15.0 // より広い間隔に
@@ -217,7 +219,7 @@ class PlayerViewModel: ObservableObject {
 
 // MARK: - Immersive Player View
 struct ImmersiveView: View {
-    @EnvironmentObject var viewModel: PlayerViewModel
+    @Bindable var viewModel: PlayerViewModel
     @State private var players: [AVPlayer] = []
     @State private var videoMaterials: [VideoMaterial] = []
     @State private var videoEntities: [Entity] = []
@@ -308,10 +310,12 @@ struct ImmersiveView: View {
                 
                 videoEntities.append(videoEntity)
                 frameEntities.append(frameEntity)
-
+                
                 // 再生開始
                 player.replaceCurrentItem(with: playerItem)
                 player.play()
+                
+                logger.debug("video \(index) is played")
             }
         }
         .onChange(of: viewModel.shouldPlayInStereo) { _, newValue in
@@ -330,9 +334,10 @@ struct ImmersiveView: View {
 
 // MARK: - Content View (UI)
 struct ContentView: View {
-    @EnvironmentObject var viewModel: PlayerViewModel
+    @Bindable var viewModel: PlayerViewModel
     @Environment(\.openImmersiveSpace) var openImmersiveSpace
     @Environment(\.dismissImmersiveSpace) var dismissImmersiveSpace
+    @Environment(AppModel.self) private var appModel
 
     var body: some View {
         VStack {
@@ -401,7 +406,7 @@ struct ContentView: View {
     // 再生開始
     func startPlayback() {
         Task {
-            switch await openImmersiveSpace(id: "PlayerSpace") {
+            switch await openImmersiveSpace(id: appModel.immersiveSpaceID) {
             case .opened:
                 viewModel.isImmersiveSpaceShown = true
             default:
