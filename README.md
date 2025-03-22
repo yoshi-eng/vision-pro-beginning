@@ -27,3 +27,11 @@ A. Vision Pro Beginning は良い印象を受けます。いくつかの点で�
 
 初めてのVision Proアプリ開発という文脈において、この名前は皆さんの意図やチームの立ち位置をうまく表現していると思います。
 新しいプラットフォームでの「始まり」を意味する名前なので、今後成長していくチームやプロジェクトにもふさわしいと感じます。
+
+# 素材
+https://www.icloud.com/iclouddrive/03e0OWzNoxPaXJmcNDTjOdyHg
+- bgm_main.wav（画像選択後、イマーシブモード中盤までを想定）
+- video1.mov(day0事前イベント、ファーストコンタクト)
+- video2.mov(day1初日、みんなで頑張るぞ！)
+- video3.mov(day2ランチ、和気藹々)
+- video4.mov(day2作業頑張ってるぜ)
