@@ -40,13 +40,19 @@ struct LookBackView: View {
     var body: some View {
         let opacity: Double = (Double(bubbles.count - remainBubbles.count) / Double(bubbles.count)) * 0.5
         RealityView { content in
+            content.add(BubbleEntity.generateBubbleEntity(position: SIMD3<Float>(0.0, 0.0, -5.0), radius: 0.2))
+            content.add(BubbleEntity.generateBubbleEntity(position: SIMD3<Float>(0.0, 2.0, -5.0), radius: 0.5))
+            content.add(BubbleEntity.generateBubbleEntity(position: SIMD3<Float>(2.0, 0, -5.0), radius: 0.8))
+            
+            let videoEntity = VideoPlayerEntity(position: SIMD3<Float>(2.0, 0, -4.9), radius: 0.8, videoName: "video1")
+            content.add(videoEntity.entity)
+            
             // BGM1を再生する
             let rootEntity = AnchorEntity()
             content.add(rootEntity)
             let audioName = "bgm_main.wav"
             /// The configuration to loop the audio file continously.
             let configuration = AudioFileResource.Configuration(shouldLoop: true)
-//            rootEntity.addChild(<#T##Entity#>)
 
             // Load the audio source and set its configuration.
             guard let audio = try? AudioFileResource.load(
