@@ -9,7 +9,7 @@ import SwiftUI
 import RealityKit
 import RealityKitContent
 
-struct BubbleModel: Equatable {
+struct BubbleModel {
     var videoName: String
     var position: SIMD3<Float>
     var radius: Float
@@ -31,8 +31,8 @@ struct LookBackView: View {
     ]
     
     // State of remaining display
-    @State var allBubbleEntities: [Entity] = []
-    @State var remainBubbleEntities: [Entity] = []
+    @State var allBubbleEntities: [VideoPlayerEntity] = []
+    @State var remainBubbleEntities: [VideoPlayerEntity] = []
     
     // 最後の一個を消したら次へ
     var onBrokenAllBubbles: () -> Void
@@ -63,24 +63,26 @@ struct LookBackView: View {
             content.add(LookBackView.breakBubbleEntity)
             
             // バブルを表示
-            var entities: [Entity] = []
+            var videoEntities: [VideoPlayerEntity] = []
             for bubble in bubbles {
-                let videoEntity = VideoPlayerEntity(position: bubble.position, radius: bubble.radius, videoName: bubble.videoName).entity
+                let videoEntity = VideoPlayerEntity(position: bubble.position, radius: bubble.radius, videoName: bubble.videoName)
                 let bubbleEntity = BubbleEntity.generateBubbleEntity(position: .zero, radius: bubble.radius)
-                videoEntity.addChild(bubbleEntity)
-                content.add(videoEntity)
-                entities.append(videoEntity)
+                videoEntity.entity.addChild(bubbleEntity)
+                content.add(videoEntity.entity)
+                videoEntities.append(videoEntity)
             }
-            allBubbleEntities = entities
-            remainBubbleEntities = entities
+            allBubbleEntities = videoEntities
+            remainBubbleEntities = videoEntities
+            print("\(remainBubbleEntities.count)/\(allBubbleEntities.count)")
             
             // イマーシブを終了するためのエンティティ
             content.add(BackSphereEntity.shared)
         } update: { content in
             // 消されたバブルを非表示にする
-            for entity in allBubbleEntities {
-                if !remainBubbleEntities.contains(entity) {
-                    if let target = content.entities.first(where: { $0 == entity }) {
+            print("\(remainBubbleEntities.count)/\(allBubbleEntities.count)")
+            for videoEntity in allBubbleEntities {
+                if !remainBubbleEntities.contains(where: { $0.entity == videoEntity.entity }) {
+                    if let target = content.entities.first(where: { $0 == videoEntity.entity }) {
                         target.transform.scale = SIMD3<Float>(0.0, 0.0, 0.0)
                     }
                 }
@@ -88,10 +90,16 @@ struct LookBackView: View {
         }
         .preferredSurroundingsEffect(.colorMultiply(Color.green))
         .gesture(TapGesture().targetedToEntity(LookBackView.breakBubbleEntity).onEnded { _ in
+            print("\(remainBubbleEntities.count)/\(allBubbleEntities.count)")
             // バブルを一つ消したということにする
             if remainBubbleEntities.count > 1 {
-                remainBubbleEntities.removeLast()
+                remainBubbleEntities.removeFirst()
             } else {
+                // 全てのビデオを停止する
+                for videoEntity in allBubbleEntities {
+                    videoEntity.player.pause()
+                }
+                
                 // 最後の一個を消したら次へ
                 onBrokenAllBubbles()
             }
