@@ -3,7 +3,6 @@ import RealityKit
 import AVFoundation
 import CoreMedia
 import Combine
-import RealityKitContent
 
 // MARK: - Video Info Model
 @Observable
@@ -214,121 +213,6 @@ class PlayerViewModel {
 
     var isStereoEnabled: Bool {
         isSpatialVideoAvailable && shouldPlayInStereo
-    }
-}
-
-// MARK: - Immersive Player View
-struct ImmersiveView: View {
-    @Bindable var viewModel: PlayerViewModel
-    @State private var players: [AVPlayer] = []
-    @State private var videoMaterials: [VideoMaterial] = []
-    @State private var videoEntities: [Entity] = []
-    @State private var frameEntities: [Entity] = []
-
-    var body: some View {
-        RealityView { content in
-            // 不要なエンティティをクリア
-            videoEntities.forEach { $0.removeFromParent() }
-            videoEntities.removeAll()
-            frameEntities.forEach { $0.removeFromParent() }
-            frameEntities.removeAll()
-            players.removeAll()
-            videoMaterials.removeAll()
-            
-            // 各ビデオに対して処理を実行
-            for (index, videoPosition) in viewModel.videos.enumerated() {
-                // ビデオファイル名（すべて同じビデオを使用）
-                let fileName = "video1"
-                
-                guard let url = Bundle.main.url(forResource: fileName, withExtension: "mov") else {
-                    print("\(fileName).movが見つかりません")
-                    continue
-                }
-                
-                let asset = AVURLAsset(url: url)
-                let playerItem = AVPlayerItem(asset: asset)
-                let player = AVPlayer()
-                players.append(player)
-
-                // 現在のビデオ情報を取得（位置情報も保持）
-                let currentVideoInfo = videoPosition
-                
-                // ビデオ情報を更新（位置情報は維持）
-                guard let updatedVideoInfo = await VideoTools.getVideoInfo(asset: asset, existingInfo: currentVideoInfo) else {
-                    print("ビデオ情報の取得に失敗しました")
-                    continue
-                }
-
-                // ビューモデルを更新
-                DispatchQueue.main.async {
-                    self.viewModel.videos[index] = updatedVideoInfo
-                    if updatedVideoInfo.isSpatial {
-                        self.viewModel.isSpatialVideoAvailable = true
-                    }
-                }
-
-                // ビデオプレーン用のメッシュとトランスフォームを取得
-                guard let (_, baseTransform) = await VideoTools.makeVideoMesh(videoInfo: updatedVideoInfo) else {
-                    print("ビデオメッシュの作成に失敗しました")
-                    continue
-                }
-
-                // ビデオマテリアルを作成
-                let videoMaterial = VideoMaterial(avPlayer: player)
-                videoMaterials.append(videoMaterial)
-                
-                // ステレオモードを設定
-                videoMaterial.controller.preferredViewingMode = viewModel.isStereoEnabled ? .stereo : .mono
-                
-                // 円形ポータル用のメッシュを作成
-                let portalRadius: Float = 0.4
-                let portalMesh = VideoTools.createPortalMesh(radius: portalRadius)
-                
-                // ビデオ表示用エンティティを作成（円形メッシュを使用）
-                let videoEntity = ModelEntity(mesh: portalMesh, materials: [videoMaterial])
-                
-                // ビデオが正面を向くようにスケールと回転を設定
-                videoEntity.transform.scale = baseTransform.scale
-                videoEntity.transform.rotation = simd_quatf(angle: Float.pi / 2, axis: SIMD3<Float>(1, 0, 0))
-                videoEntity.transform.translation = updatedVideoInfo.position
-                
-                // 装飾用のフレームを追加
-                let frameThickness: Float = 0.05
-                let outerFrameRadius = portalRadius + frameThickness
-                let frameMesh = VideoTools.createPortalMesh(radius: outerFrameRadius)
-                let frameMaterial = VideoTools.createFrameMaterial()
-                
-                // フレームエンティティの作成
-                let frameEntity = ModelEntity(mesh: frameMesh, materials: [frameMaterial])
-                frameEntity.transform = videoEntity.transform
-                // フレームを少し後ろに配置
-                frameEntity.transform.translation.z += 0.01
-                
-                // エンティティをシーンに追加（フレームが後ろに見えるように先に追加）
-                content.add(frameEntity)
-                content.add(videoEntity)
-                
-                videoEntities.append(videoEntity)
-                frameEntities.append(frameEntity)
-                
-                // 再生開始
-                player.replaceCurrentItem(with: playerItem)
-                player.play()
-                
-                logger.debug("video \(index) is played")
-            }
-        }
-        .onChange(of: viewModel.shouldPlayInStereo) { _, newValue in
-            // ステレオ/モノ設定が変更されたときにマテリアルを更新
-            updateStereoMode()
-        }
-    }
-
-    // ステレオモードを更新
-    func updateStereoMode() {
-        for material in videoMaterials {
-            material.controller.preferredViewingMode = viewModel.isStereoEnabled ? .stereo : .mono
-        }
     }
 }
 
