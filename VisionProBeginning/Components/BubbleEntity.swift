@@ -11,18 +11,16 @@ import RealityKitContent
 class BubbleEntity {
     
     static func generateBubbleEntity(position: SIMD3<Float>, radius: Float) -> ModelEntity {
-        let model = ModelEntity(
-            mesh: .generatePlane(width: radius * 2,
-                                 depth: radius * 2,
-                                 cornerRadius: radius),
-            materials: [SimpleMaterial(color: .white, isMetallic: true)]
-        )
+        let meshShape = MeshResource.generateSphere(radius: 0.1)
+
+        var material = PhysicallyBasedMaterial()
+        // Make the bubble as transparent as possible
+        material.blending = .transparent(opacity: .init(floatLiteral: 0.1))
+        // Add the bubble light effect
+        material.clearcoat = .init(floatLiteral: 1.0)
         
-        model.transform.scale = SIMD3<Float>(1, 1, 1)
-        model.transform.rotation = simd_quatf(angle: Float.pi / 2, axis: SIMD3<Float>(1, 0, 0))
-        
+        let model = ModelEntity(mesh: meshShape, materials: [material])
         model.position = position
-        
         
         // Enable interactions on the entity.
         model.components.set(InputTargetComponent())
