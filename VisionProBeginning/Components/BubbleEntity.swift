@@ -11,7 +11,7 @@ import RealityKitContent
 class BubbleEntity {
     
     static func generateBubbleEntity(position: SIMD3<Float>, radius: Float) -> ModelEntity {
-        let meshShape = MeshResource.generateSphere(radius: 0.1)
+        let meshShape = MeshResource.generateSphere(radius: radius)
 
         var material = PhysicallyBasedMaterial()
         // Make the bubble as transparent as possible
@@ -24,7 +24,7 @@ class BubbleEntity {
         
         // Enable interactions on the entity.
         model.components.set(InputTargetComponent())
-        model.components.set(CollisionComponent(shapes: [.generateSphere(radius: 0.1)]))
+        model.components.set(CollisionComponent(shapes: [.generateSphere(radius: radius)]))
         return model
     }
 }
