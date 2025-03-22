@@ -46,9 +46,12 @@ struct LookBackView: View {
             
             content.add(BubbleEntity.generateBubbleEntity(position: SIMD3<Float>(0.0, 0.0, -5.0), radius: 0.2))
             content.add(BubbleEntity.generateBubbleEntity(position: SIMD3<Float>(0.0, 2.0, -5.0), radius: 0.5))
-            content.add(BubbleEntity.generateBubbleEntity(position: SIMD3<Float>(2.0, 0, -5.0), radius: 0.8))
+
+            let bubble = BubbleEntity.generateBubbleEntity(position: SIMD3<Float>(0, 0, 0), radius: 0.8)
             
-            let videoEntity = VideoPlayerEntity(position: SIMD3<Float>(2.0, 0, -4.9), radius: 0.8, videoName: "video1")
+            let videoEntity = VideoPlayerEntity(position: SIMD3<Float>(2.0, 0, -5.0), radius: 0.8, videoName: "video1")
+            videoEntity.entity.addChild(bubble)
+            
             content.add(videoEntity.entity)
 
             // バブルを一つ消したということにするエンティティ
