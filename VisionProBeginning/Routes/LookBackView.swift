@@ -36,31 +36,13 @@ struct LookBackView: View {
         model.components.set(CollisionComponent(shapes: [.generateSphere(radius: 0.1)]))
         return model
     }()
-    
+    let bgmEntity = AmbientSoundEntity(audioName: "bgm_main.wav")
+
     var body: some View {
         let opacity: Double = (Double(bubbles.count - remainBubbles.count) / Double(bubbles.count)) * 0.5
         RealityView { content in
-            // BGM1を再生する
-            let rootEntity = AnchorEntity()
-            content.add(rootEntity)
-            let audioName = "bgm_main.wav"
-            /// The configuration to loop the audio file continously.
-            let configuration = AudioFileResource.Configuration(shouldLoop: true)
-//            rootEntity.addChild(<#T##Entity#>)
-
-            // Load the audio source and set its configuration.
-            guard let audio = try? AudioFileResource.load(
-                named: audioName,
-                configuration: configuration
-            ) else {
-                print("Failed to load audio file.")
-                return
-            }
-            /// The focus for the directivity of the spatial audio.
-            let focus: Double = 0.5
-            rootEntity.spatialAudio = SpatialAudioComponent(directivity: .beam(focus: focus))
-            // Set the entity to play audio.
-            rootEntity.playAudio(audio)
+            content.add(bgmEntity.entity)
+            bgmEntity.audioPlaybackController.play()
 
             // バブルを一つ消したということにするエンティティ
             content.add(LookBackView.breakBubbleEntity)

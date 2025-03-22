@@ -34,8 +34,13 @@ struct ComeBackView: View {
         return textModel
     }
     
+    let bgmEntity = AmbientSoundEntity(audioName: "bgm_ending.wav")
+    
     var body: some View {
         RealityView { content in
+            content.add(bgmEntity.entity)
+            bgmEntity.audioPlaybackController.play()
+            
             // テキストを表示する
             do {
                 let textEntity1 = try await getTextEntity1()
