@@ -35,7 +35,7 @@ struct ContentSelectView: View {
                     PhotosPicker(selection: $photos) {
                         Text("選び直す")
                     }
-                    ToggleImmersiveSpaceButton(openText: "思い出を\n振り返ろう")
+                    ToImmersiveButton(text: "思い出を振り返ろう")
                 }
             }
         }
