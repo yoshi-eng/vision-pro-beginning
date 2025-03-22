@@ -11,12 +11,12 @@ import RealityKitContent
 import ARKit
 
 struct DarkView: View {
-    // バブルは後ろに固定表示
-    var bubbles: [ModelEntity] = [
-        BubbleEntity.generateBubbleEntity(position: SIMD3<Float>(-1, 2, 4+2), radius: 0.3),
-        BubbleEntity.generateBubbleEntity(position: SIMD3<Float>( 1, 2, 4+1), radius: 0.3),
-        BubbleEntity.generateBubbleEntity(position: SIMD3<Float>(-1, 2, 4+0), radius: 0.3),
-        BubbleEntity.generateBubbleEntity(position: SIMD3<Float>( 1, 2, 4-2), radius: 0.3)
+    // Configuration to display bubbles: fixed value
+    var bubbles: [BubbleModel] = [
+        BubbleModel("video1", [-2, 1.6, 4], 0.6),
+        BubbleModel("video2", [ 1, 1.6, 3], 0.6),
+        BubbleModel("video3", [-1, 2.2, 3], 0.6),
+        BubbleModel("video4", [ 2, 2.2, 4], 0.6)
     ]
     
     // 監視系の同期タイマー
@@ -46,34 +46,10 @@ struct DarkView: View {
     }
     
     // 光をつかんだということにするエンティティ
-    static let comeBackLight = {
-        let mesh = MeshResource.generateSphere(radius: 0.1)
-        let materials = [SimpleMaterial(color: .yellow, isMetallic: false)]
-        let model = ModelEntity(mesh: mesh, materials: materials)
-        
-        // 自分の正面に配置
-        model.position = SIMD3<Float>(0, 1, -4)
-        
-        // Enable interactions on the entity.
-        model.components.set(InputTargetComponent())
-        model.components.set(CollisionComponent(shapes: [.generateSphere(radius: 0.1)]))
-        return model
-    }()
+    let lightEntity = LightEntity.generateLightEntity()
     
     var body: some View {
         RealityView { content in
-            // バブルのエンティティを表裏反転して表示
-            for bubble in bubbles {
-                bubble.transform.rotation = .init(angle: 180, axis: SIMD3<Float>(1, 0, 0))
-                content.add(bubble)
-            }
-            
-            // 光をつかんだということにするエンティティ
-            content.add(DarkView.comeBackLight)
-            
-            // イマーシブを終了するためのエンティティ
-            content.add(BackSphereEntity.shared)
-            
             // 後ろに振り向かせるための誘導テキスト
             do {
                 let textModel = try await getTextEntity()
@@ -82,14 +58,33 @@ struct DarkView: View {
                 print(error.localizedDescription)
             }
             
+            // バブルのエンティティを表裏反転して表示
+            for bubble in bubbles {
+                // TODO: なぜかクラッシュする！！
+//                let videoEntity = VideoPlayerEntity(position: bubble.position, radius: bubble.radius, videoName: bubble.videoName)
+//                let bubbleEntity = BubbleEntity.generateBubbleEntity(position: .zero, radius: bubble.radius)
+//                videoEntity.entity.addChild(bubbleEntity)
+//                content.add(videoEntity.entity)
+                
+                // デバッグ用回避
+                let bubbleEntity = BubbleEntity.generateBubbleEntity(position: bubble.position, radius: bubble.radius)
+                content.add(bubbleEntity)
+            }
+            
+            // 光をつかんだということにするエンティティ
+            content.add(lightEntity)
+            
+            // イマーシブを終了するためのエンティティ
+            content.add(BackSphereEntity.shared)
+            
         } update: { content in
             // 一度振り向いたら光のエンティティを表示する
-            if let model = content.entities.first(where: { $0 == DarkView.comeBackLight }) as? ModelEntity {
+            if let model = content.entities.first(where: { $0 == lightEntity }) as? ModelEntity {
                 model.transform.scale = isTurnedBack ? [1, 1, 1] : [0, 0, 0]
             }
         }
         .preferredSurroundingsEffect(.colorMultiply(.black))
-        .gesture(TapGesture().targetedToEntity(DarkView.comeBackLight).onEnded { _ in
+        .gesture(TapGesture().targetedToEntity(lightEntity).onEnded { _ in
             // 光をつかんだということにする
             onCatchLight()
         })
