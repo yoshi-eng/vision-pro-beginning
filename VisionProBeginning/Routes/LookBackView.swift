@@ -10,11 +10,56 @@ import RealityKit
 import RealityKitContent
 
 struct LookBackView: View {
+    @State var bubbles: [ModelEntity] = [
+        BubbleEntity.generateBubbleEntity(position: SIMD3<Float>(0, 0, -5), radius: 0.2),
+        BubbleEntity.generateBubbleEntity(position: SIMD3<Float>(1, 0, -5), radius: 0.4),
+        BubbleEntity.generateBubbleEntity(position: SIMD3<Float>(2, 0, -5), radius: 0.6),
+        BubbleEntity.generateBubbleEntity(position: SIMD3<Float>(3, 0, -5), radius: 0.8)
+    ]
+    @State var remainBubbles: [ModelEntity] = []
+    var onBrokenAllBubbles: () -> Void
+    
+    // バブルを一つ消したということにするエンティティ
+    static let breakBubbleEntity = {
+        let model = ModelEntity(
+            mesh: .generateSphere(radius: 0.1),
+            materials: [SimpleMaterial(color: .blue, isMetallic: false)])
+        
+        // 自分の正面の1mの位置に配置
+        model.position = SIMD3<Float>(0.0, -1.0, -5.0)
+        
+        // Enable interactions on the entity.
+        model.components.set(InputTargetComponent())
+        model.components.set(CollisionComponent(shapes: [.generateSphere(radius: 0.1)]))
+        return model
+    }()
+    
     var body: some View {
+        let opacity: Double = (Double(bubbles.count - remainBubbles.count) / Double(bubbles.count)) * 0.5
         RealityView { content in
-            content.add(BubbleEntity.generateBubbleEntity(position: SIMD3<Float>(0.0, 0.0, -5.0), radius: 0.2))
-            content.add(BubbleEntity.generateBubbleEntity(position: SIMD3<Float>(0.0, 2.0, -5.0), radius: 0.5))
-            content.add(BubbleEntity.generateBubbleEntity(position: SIMD3<Float>(2.0, 0, -5.0), radius: 0.8))
+            content.add(LookBackView.breakBubbleEntity)
+            for bubble in bubbles {
+                content.add(bubble)
+            }
+            remainBubbles = bubbles
+        } update: { content in
+            for bubble in bubbles {
+                if !remainBubbles.contains(bubble) {
+                    if let model = content.entities.first(where: { $0 == bubble }) {
+                        model.transform.scale = SIMD3<Float>(0.0, 0.0, 0.0)
+                    }
+                }
+            }
         }
+        .preferredSurroundingsEffect(.colorMultiply(Color.green.opacity(opacity)))
+        .gesture(TapGesture().targetedToEntity(LookBackView.breakBubbleEntity).onEnded { _ in
+            // バブルを一つ消したということにする
+            if remainBubbles.count > 1 {
+                remainBubbles.removeLast()
+            } else {
+                // 最後の一個を消したら
+                onBrokenAllBubbles()
+            }
+        })
     }
 }
