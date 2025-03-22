@@ -10,13 +10,16 @@ import RealityKit
 import RealityKitContent
 
 struct LookBackView: View {
-    @State var bubbles: [ModelEntity] = [
-        BubbleEntity.generateBubbleEntity(position: SIMD3<Float>(0, 0, -5), radius: 0.2),
-        BubbleEntity.generateBubbleEntity(position: SIMD3<Float>(1, 0, -5), radius: 0.4),
-        BubbleEntity.generateBubbleEntity(position: SIMD3<Float>(2, 0, -5), radius: 0.6),
-        BubbleEntity.generateBubbleEntity(position: SIMD3<Float>(3, 0, -5), radius: 0.8)
+    // バブルの状態管理
+    var bubbles: [ModelEntity] = [
+        BubbleEntity.generateBubbleEntity(position: SIMD3<Float>(-1, 1.6, -4+2), radius: 0.3),
+        BubbleEntity.generateBubbleEntity(position: SIMD3<Float>( 1, 1.6, -4+1), radius: 0.3),
+        BubbleEntity.generateBubbleEntity(position: SIMD3<Float>(-1, 1.6, -4+0), radius: 0.3),
+        BubbleEntity.generateBubbleEntity(position: SIMD3<Float>( 1, 1.6, -4-2), radius: 0.3)
     ]
     @State var remainBubbles: [ModelEntity] = []
+    
+    // 最後の一個を消したら次へ
     var onBrokenAllBubbles: () -> Void
     
     // バブルを一つ消したということにするエンティティ
@@ -37,12 +40,13 @@ struct LookBackView: View {
     var body: some View {
         let opacity: Double = (Double(bubbles.count - remainBubbles.count) / Double(bubbles.count)) * 0.5
         RealityView { content in
+            // BGM1を再生する
             let rootEntity = AnchorEntity()
             content.add(rootEntity)
             let audioName = "bgm_main.wav"
             /// The configuration to loop the audio file continously.
             let configuration = AudioFileResource.Configuration(shouldLoop: true)
-            rootEntity.addChild(<#T##Entity#>)
+//            rootEntity.addChild(<#T##Entity#>)
 
             // Load the audio source and set its configuration.
             guard let audio = try? AudioFileResource.load(
@@ -57,13 +61,20 @@ struct LookBackView: View {
             rootEntity.spatialAudio = SpatialAudioComponent(directivity: .beam(focus: focus))
             // Set the entity to play audio.
             rootEntity.playAudio(audio)
-                     
+
+            // バブルを一つ消したということにするエンティティ
             content.add(LookBackView.breakBubbleEntity)
+            
+            // バブルを表示
             for bubble in bubbles {
                 content.add(bubble)
             }
             remainBubbles = bubbles
+            
+            // イマーシブを終了するためのエンティティ
+            content.add(BackSphereEntity.shared)
         } update: { content in
+            // 消されたバブルを非表示にする
             for bubble in bubbles {
                 if !remainBubbles.contains(bubble) {
                     if let model = content.entities.first(where: { $0 == bubble }) {
@@ -78,7 +89,7 @@ struct LookBackView: View {
             if remainBubbles.count > 1 {
                 remainBubbles.removeLast()
             } else {
-                // 最後の一個を消したら
+                // 最後の一個を消したら次へ
                 onBrokenAllBubbles()
             }
         })
