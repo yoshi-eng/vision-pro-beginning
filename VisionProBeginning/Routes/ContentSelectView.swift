@@ -16,7 +16,7 @@ struct ContentSelectView: View {
     
     var body: some View {
         VStack {
-            if !photos.isEmpty {
+            if photos.isEmpty {
                 PhotosPicker(selection: $photos) {
                     Text("思い出を選ぶ")
                 }

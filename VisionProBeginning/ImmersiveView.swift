@@ -20,7 +20,9 @@ struct ImmersiveView: View {
         Group {
             switch route {
             case 0: LookBackView()
-            case 1: DarkView()
+            case 1: DarkView {
+                route = 2
+            }
             case 9:
                 // デバッグ用
                 RealityView { content in
