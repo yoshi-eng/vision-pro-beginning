@@ -14,7 +14,7 @@ struct ImmersiveView: View {
     @Environment(\.dismissImmersiveSpace) private var dismissImmersiveSpace
     @Environment(\.openImmersiveSpace) private var openImmersiveSpace
     @Environment(\.openWindow) private var openWindow
-    @State var route = 9
+    @State var route = 1
     
     var body: some View {
         Group {
