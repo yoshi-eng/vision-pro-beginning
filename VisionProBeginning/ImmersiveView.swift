@@ -20,6 +20,19 @@ struct ImmersiveView: View {
                 // Put skybox here.  See example in World project available at
                 // https://developer.apple.com/
             }
+            
+            // Check whether there's an attachment.
+//            if let attachment = attachments.entity(for: "MyAttachmentEntity") {
+//                
+//                attachment.name = viewAttachmentEntity.title.rawValue
+//                
+//                // Add it as a subentity of the plane.
+//                plane?.addChild(attachment)
+//                
+//                // Set the scale and position.
+//                attachment.scale = viewAttachmentEntity.scale
+//                attachment.setPosition(viewAttachmentEntity.position, relativeTo: yellowArch)
+//            }
         }
     }
 }

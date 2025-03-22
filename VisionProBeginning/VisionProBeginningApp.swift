@@ -13,7 +13,7 @@ struct VisionProBeginningApp: App {
     @State private var appModel = AppModel()
 
     var body: some Scene {
-        WindowGroup {
+        WindowGroup(id: appModel.windowGroupID) {
             ContentView()
                 .environment(appModel)
         }

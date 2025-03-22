@@ -11,6 +11,7 @@ struct ToImmersiveButton: View {
     @Environment(AppModel.self) private var appModel
     @Environment(\.dismissImmersiveSpace) private var dismissImmersiveSpace
     @Environment(\.openImmersiveSpace) private var openImmersiveSpace
+    @Environment(\.dismissWindow) private var dismissWindow
     var text: String
     
     var body: some View {
@@ -33,6 +34,9 @@ struct ToImmersiveButton: View {
                     // On unknown response, assume space did not open.
                     appModel.immersiveSpaceState = .closed
                 }
+                
+                // ウインドウを閉じる
+                dismissWindow(id: appModel.windowGroupID)
             }
         } label: {
             Text(text)
