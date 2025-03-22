@@ -12,7 +12,12 @@ import ARKit
 
 struct DarkView: View {
     @Environment(AppModel.self) private var appModel
-    @State var bubbles: [String] = [] // 仮でString
+    var bubbles: [ModelEntity] = [
+        BubbleEntity.generateBubbleEntity(position: SIMD3<Float>(0, 0, 5), radius: 0.5),
+        BubbleEntity.generateBubbleEntity(position: SIMD3<Float>(-2, 1, 3), radius: 0.5),
+        BubbleEntity.generateBubbleEntity(position: SIMD3<Float>(2, 0, 5), radius: 0.5),
+        BubbleEntity.generateBubbleEntity(position: SIMD3<Float>(3, -2, 4), radius: 0.5)
+    ]
     @State var isTurnedBack = false
     
     @StateObject var vm: DarkViewModel = DarkViewModel()
@@ -21,14 +26,32 @@ struct DarkView: View {
     
     var onCatchLight: () -> Void
     
+    func getTextEntity() async throws -> ModelEntity {
+        let textString = AttributedString("思い出は後ろから見守ってくれる")
+        let textMesh = try await MeshResource(
+            extruding: textString
+        )
+        let material = SimpleMaterial(
+            color: .white,
+            isMetallic: false
+        )
+        let textModel = ModelEntity(mesh: textMesh, materials: [material])
+        
+        let boundingBox = textModel.visualBounds(relativeTo: nil)
+        let textWidth = boundingBox.extents.x
+        textModel.position = SIMD3<Float>(-textWidth / 2, 2, -4)
+        
+        return textModel
+    }
+    
     // 光をつかんだということにするエンティティ
     static let comeBackLight = {
         let model = ModelEntity(
             mesh: .generateSphere(radius: 0.1),
             materials: [SimpleMaterial(color: .yellow, isMetallic: false)])
         
-        // 自分の正面の1mの位置に配置
-        model.position = SIMD3<Float>(0.0, 1.0, -5.0)
+        // 自分の正面の5mの位置に配置
+        model.position = SIMD3<Float>(0, 1, -4)
         
         // Enable interactions on the entity.
         model.components.set(InputTargetComponent())
@@ -40,17 +63,28 @@ struct DarkView: View {
         RealityView { content in
             content.add(BackSphereEntity.shared)
             
-            // TODO: bubblesのエンティティを表示する
+            // bubblesのエンティティを表示する
+            for bubble in bubbles {
+                bubble.transform.rotation = .init(angle: 180, axis: SIMD3<Float>(1, 0, 0))
+                content.add(bubble)
+            }
             
-            // TODO: isTurnedBack == true → 光を新たに表示する
+            // isTurnedBack == true → 光を新たに表示する
             content.add(DarkView.comeBackLight)
+            
+            do {
+                let textModel = try await getTextEntity()
+                content.add(textModel)
+            } catch {
+                print(error.localizedDescription)
+            }
             
         } update: { content in
             if let model = content.entities.first(where: { $0 == DarkView.comeBackLight }) as? ModelEntity {
-                model.transform.scale = isTurnedBack ? [1.0, 1.0, 1.0] : [0.01, 0.01, 0.01]
+                model.transform.scale = isTurnedBack ? [1, 1, 1] : [0, 0, 0]
             }
         }
-        .preferredSurroundingsEffect(.colorMultiply(.black))
+//        .preferredSurroundingsEffect(.colorMultiply(.black))
         .gesture(TapGesture().targetedToEntity(DarkView.comeBackLight).onEnded { _ in
             // 光をつかんだということにする
             onCatchLight()
