@@ -14,12 +14,14 @@ struct ImmersiveView: View {
     @Environment(\.dismissImmersiveSpace) private var dismissImmersiveSpace
     @Environment(\.openImmersiveSpace) private var openImmersiveSpace
     @Environment(\.openWindow) private var openWindow
-    @State var route = 9
+    @State var route = 0
     
     var body: some View {
         Group {
             switch route {
-            case 0: LookBackView()
+            case 0: LookBackView {
+                route = 1
+            }
             case 1: DarkView {
                 route = 2
             }
