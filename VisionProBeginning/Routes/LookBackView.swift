@@ -63,23 +63,23 @@ struct LookBackView: View {
             content.add(LookBackView.breakBubbleEntity)
             
             // バブルを表示
-            allBubbleEntities = []
-            remainBubbleEntities = []
+            var entities: [Entity] = []
             for bubble in bubbles {
-                let videoEntity = VideoPlayerEntity(position: bubble.position, radius: bubble.radius, videoName: bubble.videoName)
+                let videoEntity = VideoPlayerEntity(position: bubble.position, radius: bubble.radius, videoName: bubble.videoName).entity
                 let bubbleEntity = BubbleEntity.generateBubbleEntity(position: .zero, radius: bubble.radius)
-                videoEntity.entity.addChild(bubbleEntity)
-                content.add(videoEntity.entity)
-                allBubbleEntities.append(videoEntity.entity)
-                remainBubbleEntities.append(videoEntity.entity)
+                videoEntity.addChild(bubbleEntity)
+                content.add(videoEntity)
+                entities.append(videoEntity)
             }
+            allBubbleEntities = entities
+            remainBubbleEntities = entities
             
             // イマーシブを終了するためのエンティティ
             content.add(BackSphereEntity.shared)
         } update: { content in
             // 消されたバブルを非表示にする
             for entity in allBubbleEntities {
-                if !remainBubbleEntities.contains(where: { $0 == entity }) {
+                if !remainBubbleEntities.contains(entity) {
                     if let target = content.entities.first(where: { $0 == entity }) {
                         target.transform.scale = SIMD3<Float>(0.0, 0.0, 0.0)
                     }
