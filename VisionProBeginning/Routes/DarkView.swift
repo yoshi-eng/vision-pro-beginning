@@ -46,19 +46,7 @@ struct DarkView: View {
     }
     
     // 光をつかんだということにするエンティティ
-    static let comeBackLight = {
-        let mesh = MeshResource.generateSphere(radius: 0.1)
-        let materials = [SimpleMaterial(color: .yellow, isMetallic: false)]
-        let model = ModelEntity(mesh: mesh, materials: materials)
-        
-        // 自分の正面に配置
-        model.position = SIMD3<Float>(0, 1, -4)
-        
-        // Enable interactions on the entity.
-        model.components.set(InputTargetComponent())
-        model.components.set(CollisionComponent(shapes: [.generateSphere(radius: 0.1)]))
-        return model
-    }()
+    let lightEntity = LightEntity.generateLightEntity()
     
     var body: some View {
         RealityView { content in
@@ -69,7 +57,7 @@ struct DarkView: View {
             }
             
             // 光をつかんだということにするエンティティ
-            content.add(DarkView.comeBackLight)
+            content.add(lightEntity)
             
             // イマーシブを終了するためのエンティティ
             content.add(BackSphereEntity.shared)
@@ -84,12 +72,12 @@ struct DarkView: View {
             
         } update: { content in
             // 一度振り向いたら光のエンティティを表示する
-            if let model = content.entities.first(where: { $0 == DarkView.comeBackLight }) as? ModelEntity {
+            if let model = content.entities.first(where: { $0 == lightEntity }) as? ModelEntity {
                 model.transform.scale = isTurnedBack ? [1, 1, 1] : [0, 0, 0]
             }
         }
         .preferredSurroundingsEffect(.colorMultiply(.black))
-        .gesture(TapGesture().targetedToEntity(DarkView.comeBackLight).onEnded { _ in
+        .gesture(TapGesture().targetedToEntity(lightEntity).onEnded { _ in
             // 光をつかんだということにする
             onCatchLight()
         })
