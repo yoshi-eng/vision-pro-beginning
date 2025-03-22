@@ -14,23 +14,22 @@ struct ImmersiveView: View {
     @Environment(\.dismissImmersiveSpace) private var dismissImmersiveSpace
     @Environment(\.openImmersiveSpace) private var openImmersiveSpace
     @Environment(\.openWindow) private var openWindow
+    @State var route = 9
     
     var body: some View {
-        RealityView { content in
-            // 画面を戻るマテリアル
-            let model = ModelEntity(
-                mesh: .generateSphere(radius: 0.1),
-                materials: [SimpleMaterial(color: .white, isMetallic: true)])
-            
-            // 自分の正面の1mの位置に配置
-            model.position = SIMD3<Float>(0.0, 0.0, -5.0)
-            
-            // Enable interactions on the entity.
-            model.components.set(InputTargetComponent())
-            model.components.set(CollisionComponent(shapes: [.generateSphere(radius: 0.1)]))
-            content.add(model)
+        Group {
+            switch route {
+            case 0: LookBackView()
+            case 1: DarkView()
+            case 9:
+                // デバッグ用
+                RealityView { content in
+                    content.add(BackSphereEntity.shared)
+                }
+            default: ComeBackView()
+            }
         }
-        .gesture(TapGesture().targetedToAnyEntity().onEnded { _ in
+        .gesture(TapGesture().targetedToEntity(BackSphereEntity.shared).onEnded { _ in
             Task { @MainActor in
                 // イマーシブを終了する
                 appModel.immersiveSpaceState = .inTransition
