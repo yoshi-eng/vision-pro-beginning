@@ -160,12 +160,12 @@ struct VideoTools {
     }
     
     // ポータルフレームのマテリアルを作成
-    static func createPortalMaterial() -> SimpleMaterial {
+    func createPortalMaterial() -> SimpleMaterial {
         // 輝く青いマテリアル（ポータル用）
         let material = SimpleMaterial(
             color: .init(red: 0.0, green: 0.5, blue: 1.0, alpha: 0.8),
             roughness: 0.2,
-            isMetallic: true
+            isMetallic: false
         )
         
         return material

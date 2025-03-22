@@ -22,7 +22,6 @@ struct VisionProBeginningApp: App {
     
     @State private var appModel = AppModel()
     @State private var playerViewModel = PlayerViewModel()
-    @State private var playerModel: PlayerModel = PlayerModel()
 
     var body: some Scene {
         WindowGroup {
@@ -33,7 +32,6 @@ struct VisionProBeginningApp: App {
         ImmersiveSpace(id: appModel.immersiveSpaceID) {
             ImmersiveView()
                 .environment(appModel)
-                .environment(playerModel)
                 .onAppear {
                     appModel.immersiveSpaceState = .open
                 }
