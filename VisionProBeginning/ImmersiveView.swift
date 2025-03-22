@@ -18,6 +18,7 @@ struct ImmersiveView: View {
     
     var body: some View {
         Group {
+            // routeによって画面を切り替える
             switch route {
             case 0: LookBackView {
                 route = 1
@@ -25,11 +26,6 @@ struct ImmersiveView: View {
             case 1: DarkView {
                 route = 2
             }
-            case 9:
-                // デバッグ用
-                RealityView { content in
-                    content.add(BackSphereEntity.shared)
-                }
             default: ComeBackView()
             }
         }
