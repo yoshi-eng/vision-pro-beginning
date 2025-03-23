@@ -33,6 +33,8 @@ struct LookBackView: View {
     // State of remaining display
     @State var allBubbleEntities: [VideoPlayerEntity] = []
     @State var remainBubbleEntities: [VideoPlayerEntity] = []
+    @State private var surroundingsColor: Color = .white
+    @State private var colorCount: String = "color5"
     
     // 最後の一個を消したら次へ
     var onBrokenAllBubbles: () -> Void
@@ -88,11 +90,14 @@ struct LookBackView: View {
                 }
             }
         }
-        .preferredSurroundingsEffect(.colorMultiply(Color.green))
+        .preferredSurroundingsEffect(.colorMultiply(surroundingsColor))
         .gesture(TapGesture().targetedToEntity(LookBackView.breakBubbleEntity).onEnded { _ in
             print("\(remainBubbleEntities.count)/\(allBubbleEntities.count)")
             // バブルを一つ消したということにする
             if remainBubbleEntities.count > 1 {
+                self.colorCount = "color\(remainBubbleEntities.count)"
+                let changedColor = ColorOpacity(rawValue: self.colorCount)!.color
+                self.surroundingsColor = changedColor
                 remainBubbleEntities.removeFirst()
             } else {
                 // 全てのビデオを停止する
@@ -105,4 +110,26 @@ struct LookBackView: View {
             }
         })
     }
+    
+    
+}
+
+enum ColorOpacity: String, CaseIterable {
+    case color1, color2, color3, color4
+
+    var color: Color {
+            switch self {
+            case .color1:
+                return .clear
+            case .color2:
+                print("priting color2")
+                return Color(red: 0.001, green: 0.01, blue: 0.01)
+            case .color3:
+                print("priting color3")
+                return Color(red: 0.01, green: 0.01, blue: 0.01)
+            case .color4:
+                print("priting color4")
+                return Color(red: 0.07, green: 0.07, blue: 0.07)
+            }
+        }
 }
