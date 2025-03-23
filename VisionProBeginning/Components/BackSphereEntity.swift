@@ -22,8 +22,8 @@ class BackSphereEntity {
             mesh: .generateSphere(radius: 0.1),
             materials: [SimpleMaterial(color: .white, isMetallic: true)])
         
-        // 自分の正面の1mの位置に配置
-        model.position = SIMD3<Float>(0.0, 0.0, -5.0)
+        // 自分の正面4m, 下4mの位置に配置
+        model.position = SIMD3<Float>(0.0, -4.0, -4.0)
         
         // Enable interactions on the entity.
         model.components.set(InputTargetComponent())
