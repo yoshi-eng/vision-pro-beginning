@@ -90,14 +90,15 @@ struct LookBackView: View {
                 }
             }
         }
-        .preferredSurroundingsEffect(.colorMultiply(surroundingsColor))
+        .applySurroundings(color: colorCount)
         .gesture(TapGesture().targetedToEntity(LookBackView.breakBubbleEntity).onEnded { _ in
             print("\(remainBubbleEntities.count)/\(allBubbleEntities.count)")
             // バブルを一つ消したということにする
             if remainBubbleEntities.count > 1 {
+//                DispatchQueue.main.asyncAfter(deadline: .now() + 1.9) {  // Add delay before changing color
+//                           self.colorCount = "color\(remainBubbleEntities.count)"
+//                       }
                 self.colorCount = "color\(remainBubbleEntities.count)"
-                let changedColor = ColorOpacity(rawValue: self.colorCount)!.color
-                self.surroundingsColor = changedColor
                 remainBubbleEntities.removeFirst()
             } else {
                 // 全てのビデオを停止する
@@ -114,22 +115,37 @@ struct LookBackView: View {
     
 }
 
+extension View {
+    func applySurroundings(color: String) -> some View {
+        // Safely unwrap the color
+        guard let changedColor = ColorOpacity(rawValue: color) else { return self }
+
+        // Apply the animation only for specific colors, else just apply the surroundings effect
+        return self
+            .animation(changedColor == .color2 || changedColor == .color3 ? .easeInOut(duration: 0.9) : nil, value: changedColor.color)
+            .preferredSurroundingsEffect(.colorMultiply(changedColor.color))
+    }
+}
+
 enum ColorOpacity: String, CaseIterable {
-    case color1, color2, color3, color4
+    case color1, color2, color3, color4, color5
 
     var color: Color {
-            switch self {
-            case .color1:
-                return .clear
-            case .color2:
-                print("priting color2")
-                return Color(red: 0.001, green: 0.01, blue: 0.01)
-            case .color3:
-                print("priting color3")
-                return Color(red: 0.01, green: 0.01, blue: 0.01)
-            case .color4:
-                print("priting color4")
-                return Color(red: 0.07, green: 0.07, blue: 0.07)
-            }
+        switch self {
+        case .color1:
+            return .clear
+        case .color2:
+            print("printing color2")
+            return Color(red: 0.01, green: 0.01, blue: 0.01)
+        case .color3:
+            print("printing color3")
+            return Color(red: 0.05, green: 0.01, blue: 0.01)
+        case .color4:
+            print("printing color4")
+            return Color(red: 0.09, green: 0.07, blue: 0.07)
+        case .color5:
+            print("printing color5")
+            return .white
         }
+    }
 }
