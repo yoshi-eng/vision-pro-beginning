@@ -73,7 +73,7 @@ struct LookBackView: View {
             print("\(remainBubbleEntities.count)/\(allBubbleEntities.count)")
             
             // イマーシブを終了するためのエンティティ
-            content.add(BackSphereEntity.shared)
+            content.add(BackSphereEntity.debug)
         } update: { content in
             // 消されたバブルを非表示にする
             print("\(remainBubbleEntities.count)/\(allBubbleEntities.count)")

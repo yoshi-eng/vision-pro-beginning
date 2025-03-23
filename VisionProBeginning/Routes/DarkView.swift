@@ -99,7 +99,7 @@ struct DarkView: View {
             content.add(lightEntity)
             
             // イマーシブを終了するためのエンティティ
-            content.add(BackSphereEntity.shared)
+            content.add(BackSphereEntity.debug)
             
         } update: { content in
             // 一度振り向いたら光のエンティティを表示する
