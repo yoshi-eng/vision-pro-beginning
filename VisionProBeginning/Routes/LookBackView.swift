@@ -134,10 +134,10 @@ enum ColorOpacity: String, CaseIterable {
             return Color(red: 0.01, green: 0.01, blue: 0.01)
         case .color3:
             print("printing color3")
-            return Color(red: 0.05, green: 0.01, blue: 0.01)
+            return Color(red: 0.05, green: 0.05, blue: 0.05)
         case .color4:
             print("printing color4")
-            return Color(red: 0.09, green: 0.07, blue: 0.07)
+            return Color(red: 0.09, green: 0.09, blue: 0.09)
         case .color5:
             print("printing color5")
             return .white
