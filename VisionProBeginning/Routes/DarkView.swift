@@ -39,11 +39,26 @@ struct DarkView: View {
     func getTextEntity1() async throws -> ModelEntity {
         let textString = AttributedString("後ろを振り返ってみて")
         let textMesh = try await MeshResource(extruding: textString)
-        let material = SimpleMaterial(color: .white, isMetallic: false)
+        
+        // 発光するマテリアルに変更
+        var material = PhysicallyBasedMaterial()
+        material.baseColor = PhysicallyBasedMaterial.BaseColor(tint: .white)
+        material.emissiveColor = PhysicallyBasedMaterial.EmissiveColor(color: .white)
+        material.emissiveIntensity = 20.0 // 発光強度を追加
+        
         let textModel = ModelEntity(mesh: textMesh, materials: [material])
         let boundingBox = textModel.visualBounds(relativeTo: nil)
         let textWidth = boundingBox.extents.x
         textModel.position = SIMD3<Float>(-textWidth / 2, 2, -4)
+        
+        // テキストにも光源を追加
+        let textLight = PointLightComponent(
+            color: .white,
+            intensity: 50000,
+            attenuationRadius: 5.0
+        )
+        textModel.components.set(textLight)
+        
         return textModel
     }
     
@@ -51,16 +66,89 @@ struct DarkView: View {
     func getTextEntity2() async throws -> ModelEntity {
         let textString = AttributedString("さあ、未来の光を掴み取ろう")
         let textMesh = try await MeshResource(extruding: textString)
-        let material = SimpleMaterial(color: .white, isMetallic: false)
+        
+        // 発光するマテリアルに変更
+        var material = PhysicallyBasedMaterial()
+        material.baseColor = PhysicallyBasedMaterial.BaseColor(tint: .white)
+        material.emissiveColor = PhysicallyBasedMaterial.EmissiveColor(color: .white)
+        material.emissiveIntensity = 20.0 // 発光強度を追加
+        
         let textModel = ModelEntity(mesh: textMesh, materials: [material])
         let boundingBox = textModel.visualBounds(relativeTo: nil)
         let textWidth = boundingBox.extents.x
         textModel.position = SIMD3<Float>(-textWidth / 2, 2, -4)
+        
+        // テキストにも光源を追加
+        let textLight = PointLightComponent(
+            color: .white,
+            intensity: 50000,
+            attenuationRadius: 5.0
+        )
+        textModel.components.set(textLight)
+        
         return textModel
     }
     
     // 光をつかんだということにするエンティティ
-    let lightEntity = LightEntity.generateLightEntity()
+    let lightEntity = {
+        // スポットライトのベースとなる球体
+        let baseMesh = MeshResource.generateSphere(radius: 0.15)
+        // 発光する素材に変更
+        var baseMaterial = PhysicallyBasedMaterial()
+        baseMaterial.baseColor = PhysicallyBasedMaterial.BaseColor(tint: .yellow)
+        baseMaterial.emissiveColor = PhysicallyBasedMaterial.EmissiveColor(color: .yellow)
+        baseMaterial.emissiveIntensity = 200.0 // 発光強度をさらに強化
+        let baseModel = ModelEntity(mesh: baseMesh, materials: [baseMaterial])
+        
+        // 自分の正面に配置
+        baseModel.position = SIMD3<Float>(0, 1, -4)
+        
+        // ライトを追加してより明るく
+        let pointLight = PointLightComponent(
+            color: .yellow,
+            intensity: 600000, // さらに強い光
+            attenuationRadius: 15.0 // さらに広範囲
+        )
+        baseModel.components.set(pointLight)
+        
+        // 実際のスポットライトも追加
+        let spotLight = SpotLightComponent(
+            color: .yellow,
+            intensity: 1000000, // さらに強い光
+            innerAngleInDegrees: 30,
+            outerAngleInDegrees: 70,
+            attenuationRadius: 20
+        )
+        baseModel.components.set(spotLight)
+        
+        // Enable interactions on the entity.
+        baseModel.components.set(InputTargetComponent())
+        baseModel.components.set(CollisionComponent(shapes: [.generateSphere(radius: 0.3)]))
+        
+        // オンロード時に明滅するアニメーションを開始する
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            // アニメーションタイマー
+            Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { _ in
+                // 現在の光の強度を取得
+                if var pointLight = baseModel.components[PointLightComponent.self],
+                   var spotLight = baseModel.components[SpotLightComponent.self] {
+                    // 光の強度を増減する
+                    if pointLight.intensity > 600000 {
+                        pointLight.intensity = 600000
+                        spotLight.intensity = 1000000
+                    } else {
+                        pointLight.intensity = 1000000
+                        spotLight.intensity = 1500000
+                    }
+                    // 更新した光のコンポーネントを設定
+                    baseModel.components.set(pointLight)
+                    baseModel.components.set(spotLight)
+                }
+            }
+        }
+        
+        return baseModel
+    }()
     
     var body: some View {
         RealityView { content in
