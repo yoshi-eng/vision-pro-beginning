@@ -83,7 +83,7 @@ struct DarkView: View {
                 model.transform.scale = isTurnedBack ? [1, 1, 1] : [0, 0, 0]
             }
         }
-        .preferredSurroundingsEffect(.colorMultiply(.black))
+        .preferredSurroundingsEffect(.colorMultiply(Color(red: 0.0001, green: 0.0001, blue: 0.0001)))
         .gesture(TapGesture().targetedToEntity(lightEntity).onEnded { _ in
             // 光をつかんだということにする
             onCatchLight()
