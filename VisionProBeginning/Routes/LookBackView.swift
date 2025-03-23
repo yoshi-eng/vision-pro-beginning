@@ -53,14 +53,9 @@ struct LookBackView: View {
         model.components.set(CollisionComponent(shapes: [.generateSphere(radius: 0.1)]))
         return model
     }()
-    let bgmEntity = AmbientSoundEntity(audioName: "bgm_main.wav")
 
     var body: some View {
         RealityView { content in
-            // BGMを再生するエンティティ
-            content.add(bgmEntity.entity)
-            bgmEntity.audioPlaybackController.play()
-            
             // バブルを一つ消したということにするエンティティ
             content.add(LookBackView.breakBubbleEntity)
             
