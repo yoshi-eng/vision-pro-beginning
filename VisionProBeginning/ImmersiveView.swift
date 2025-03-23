@@ -54,6 +54,13 @@ struct ImmersiveView: View {
                     .onAppear {
                         endingBgmPlayer?.play()
                     }
+                    .onDisappear {
+                        mainBgmPlayer?.currentTime = 0
+                        mainBgmPlayer?.pause()
+                        mainBgmPlayer?.volume = 1
+                        endingBgmPlayer?.currentTime = 0
+                        endingBgmPlayer?.pause()
+                    }
             }
         }
         .gesture(TapGesture().targetedToEntity(BackSphereEntity.shared).onEnded { _ in
