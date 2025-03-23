@@ -16,7 +16,24 @@ import RealityKitContent
  戻る処理はImmersiveViewに定義している
  */
 class BackSphereEntity {
+    // 通常の位置に表示
     static let shared = {
+        // 画面を戻るマテリアル
+        let model = ModelEntity(
+            mesh: .generateSphere(radius: 0.1),
+            materials: [SimpleMaterial(color: .white, isMetallic: true)])
+        
+        // 自分の正面4m, 下4mの位置に配置
+        model.position = SIMD3<Float>(0.0, 0.0, -4.0)
+        
+        // Enable interactions on the entity.
+        model.components.set(InputTargetComponent())
+        model.components.set(CollisionComponent(shapes: [.generateSphere(radius: 0.1)]))
+        return model
+    }()
+    
+    // 下の方に表示
+    static let debug = {
         // 画面を戻るマテリアル
         let model = ModelEntity(
             mesh: .generateSphere(radius: 0.1),

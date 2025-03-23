@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import AVFoundation
 
 @main
 struct VisionProBeginningApp: App {
@@ -16,6 +17,13 @@ struct VisionProBeginningApp: App {
         WindowGroup(id: appModel.windowGroupID) {
             ContentView()
                 .environment(appModel)
+                .onAppear {
+                    do {
+                        try AVAudioSession.sharedInstance().setCategory(.playback, mode: .default)
+                        try AVAudioSession.sharedInstance().setActive(true)
+                    } catch {
+                    }
+                }
         }
 
         ImmersiveSpace(id: appModel.immersiveSpaceID) {
