@@ -10,17 +10,35 @@ import RealityKit
 import RealityKitContent
 
 struct ImmersiveView: View {
-
+    @Environment(AppModel.self) private var appModel
+    @Environment(\.dismissImmersiveSpace) private var dismissImmersiveSpace
+    @Environment(\.openImmersiveSpace) private var openImmersiveSpace
+    @Environment(\.openWindow) private var openWindow
+    @State var route = 0
+    
     var body: some View {
-        RealityView { content in
-            // Add the initial RealityKit content
-            if let immersiveContentEntity = try? await Entity(named: "Immersive", in: realityKitContentBundle) {
-                content.add(immersiveContentEntity)
-
-                // Put skybox here.  See example in World project available at
-                // https://developer.apple.com/
+        Group {
+            // routeによって画面を切り替える
+            switch route {
+            case 0: LookBackView {
+                route = 1
+            }
+            case 1: DarkView {
+                route = 2
+            }
+            default: ComeBackView()
             }
         }
+        .gesture(TapGesture().targetedToEntity(BackSphereEntity.shared).onEnded { _ in
+            Task { @MainActor in
+                // イマーシブを終了する
+                appModel.immersiveSpaceState = .inTransition
+                await dismissImmersiveSpace()
+                
+                // ウインドウを表示する
+                openWindow(id: appModel.windowGroupID)
+            }
+        })
     }
 }
 

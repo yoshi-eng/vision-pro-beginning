@@ -13,7 +13,7 @@ struct VisionProBeginningApp: App {
     @State private var appModel = AppModel()
 
     var body: some Scene {
-        WindowGroup {
+        WindowGroup(id: appModel.windowGroupID) {
             ContentView()
                 .environment(appModel)
         }
@@ -28,6 +28,6 @@ struct VisionProBeginningApp: App {
                     appModel.immersiveSpaceState = .closed
                 }
         }
-        .immersionStyle(selection: .constant(.full), in: .full)
+        .immersionStyle(selection: .constant(.mixed), in: .mixed)
     }
 }
