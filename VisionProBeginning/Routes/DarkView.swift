@@ -13,10 +13,10 @@ import ARKit
 struct DarkView: View {
     // Configuration to display bubbles: fixed value
     var bubbles: [BubbleModel] = [
-        BubbleModel("video1", [-2, 1.6, 4], 0.6),
-        BubbleModel("video2", [ 1, 1.6, 3], 0.6),
-        BubbleModel("video3", [-1, 2.2, 3], 0.6),
-        BubbleModel("video4", [ 2, 2.2, 4], 0.6)
+        BubbleModel("video1_image.jpg", [-2, 1.6, 4], 0.6),
+        BubbleModel("video2_image.jpg", [ 1, 1.6, 3], 0.6),
+        BubbleModel("video3_image.jpg", [-1, 2.2, 3], 0.6),
+        BubbleModel("video4_image.jpg", [ 2, 2.2, 4], 0.6)
     ]
     
     // 監視系の同期タイマー
@@ -89,15 +89,10 @@ struct DarkView: View {
             
             // バブルのエンティティを表裏反転して表示
             for bubble in bubbles {
-                // TODO: なぜかクラッシュする！！
-//                let videoEntity = VideoPlayerEntity(position: bubble.position, radius: bubble.radius, videoName: bubble.videoName)
-//                let bubbleEntity = BubbleEntity.generateBubbleEntity(position: .zero, radius: bubble.radius)
-//                videoEntity.entity.addChild(bubbleEntity)
-//                content.add(videoEntity.entity)
-                
-                // デバッグ用回避
-                let bubbleEntity = BubbleEntity.generateBubbleEntity(position: bubble.position, radius: bubble.radius)
-                content.add(bubbleEntity)
+                let imageEntity = await ImagePlaneEntity.generateImagePlaneEntity(position: bubble.position, radius: bubble.radius, imageName: bubble.videoName, reversed: true)
+                let bubbleEntity = BubbleEntity.generateBubbleEntity(position: .zero, radius: bubble.radius)
+                imageEntity.addChild(bubbleEntity)
+                content.add(imageEntity)
             }
             
             // 光をつかんだということにするエンティティ
